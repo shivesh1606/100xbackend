@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from models import User
 from db import db
 from passlib.context import CryptContext
@@ -6,6 +6,8 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+
+from fastapi.responses import JSONResponse
 
 SECRET_KEY = "your_secret_key"  # Use env var in production!
 ALGORITHM = "HS256"
@@ -46,6 +48,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     return user
+
+@router.options("/login")
+async def options_login(request: Request):
+    return JSONResponse(content={"message": "Preflight OK"})
 
 @router.post("/login", response_model=Token)
 async def login(user: User):
